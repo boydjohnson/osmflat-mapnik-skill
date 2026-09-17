@@ -37,6 +37,7 @@ else
     [ -f "$PBF" ] || osmflat_die "no such pbf: $PBF"
     ARCHIVE="${2:-${PBF%.pbf}.flat}"
     OSMFLATC="$(osmflat_need osmflatc)"
+    osmflat_check_versions "$OSMFLATC" "$EXTC"
     osmflat_log "compiling $PBF -> $ARCHIVE (this is the slow step)"
     "$OSMFLATC" "$PBF" "$ARCHIVE"
 fi

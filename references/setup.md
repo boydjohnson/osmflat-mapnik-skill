@@ -30,8 +30,40 @@ osmflat archive directory:
 export OSMFLAT_ARCHIVE=/path/to/area.osm.flat
 ```
 
-If there is no archive, build one from an `.osm.pbf` extract
-(download.geofabrik.de, extract.bbbike.org):
+### No archive yet?
+
+If the user has no `.osm.flat` archive and no local `.osm.pbf`, **offer to
+download an extract from Geofabrik** rather than stopping. Ask first — extracts
+are large, and the choice of region is theirs.
+
+1. Find the region. Ask the user what area they want if it isn't already clear
+   from the request, then:
+   ```
+   scripts/fetch-extract.sh --search minnesota
+   ```
+2. Get the real size and confirm with the user before downloading:
+   ```
+   scripts/fetch-extract.sh --info us/minnesota
+   ```
+   A city or small country is a few MB; a US state is a few hundred MB; a
+   continent is several GB. Tell them the size and where it will land, and wait
+   for a yes.
+3. Download (verifies the published md5), then compile:
+   ```
+   scripts/fetch-extract.sh us/minnesota
+   scripts/build-archive.sh ~/.local/share/osmflat/data/minnesota-latest.osm.pbf
+   ```
+
+A region can be a Geofabrik id (`us/minnesota`), a full path
+(`north-america/us/minnesota`), or a complete `.osm.pbf` URL. Default
+destination is `$OSMFLAT_HOME/data`, which `render.sh` finds automatically when
+it holds exactly one archive.
+
+Prefer the smallest extract that covers the subject: compile time and disk both
+scale with the input, and a city map does not need a continent. Geofabrik data
+is OpenStreetMap, under the ODbL.
+
+If the user already has an `.osm.pbf`, skip straight to:
 
 ```
 scripts/build-archive.sh /path/to/area.osm.pbf
@@ -51,6 +83,26 @@ Rebuild only the sidecar against an existing archive:
 ```
 scripts/build-archive.sh --ext-only /path/to/area.osm.flat
 ```
+
+## Version agreement
+
+`osmflatc` and `osmflat-extc` share a flatdata schema and are released in
+lockstep. Mixing versions fails partway through the sidecar build with a
+multi-hundred-line `WrongSignature` schema diff. `build-archive.sh` checks this
+up front and refuses with a readable message instead.
+
+This is easy to hit because `PATH` beats the managed install dir — a forgotten
+`cargo install osmflatc` silently shadows the release. That precedence is
+deliberate, so that a dev build of one of these tools can be tested in place.
+To force the managed release for one run:
+
+```
+OSMFLAT_BIN_OSMFLATC=~/.local/share/osmflat/bin/osmflatc \
+OSMFLAT_BIN_OSMFLAT_EXTC=~/.local/share/osmflat/bin/osmflat-extc \
+  scripts/build-archive.sh /path/to/area.osm.pbf
+```
+
+`OSMFLAT_SKIP_VERSION_CHECK=1` overrides the check entirely.
 
 ## When a render comes back blank
 

@@ -24,12 +24,20 @@ arm64, Linux x86_64/aarch64.
 ## Data
 
 Point `OSMFLAT_ARCHIVE` at an osmflat archive, or build one from an `.osm.pbf`
-extract ([geofabrik](https://download.geofabrik.de),
-[bbbike](https://extract.bbbike.org)):
+extract:
 
 ```sh
 scripts/build-archive.sh /path/to/area.osm.pbf
 export OSMFLAT_ARCHIVE=/path/to/area.osm.flat
+```
+
+No extract on hand? Fetch one from [Geofabrik](https://download.geofabrik.de)
+(md5-verified; `--info` reports the download size first):
+
+```sh
+scripts/fetch-extract.sh --search minnesota
+scripts/fetch-extract.sh --info us/minnesota
+scripts/fetch-extract.sh us/minnesota
 ```
 
 ## Use

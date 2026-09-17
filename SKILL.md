@@ -40,8 +40,23 @@ use, so usually there is nothing to do. The one thing you must supply is data:
 export OSMFLAT_ARCHIVE=/path/to/area.osm.flat
 ```
 
-No archive, or no `.ext` sidecar beside it? Read `references/setup.md` — it
-covers building both from an `.osm.pbf` extract, and what to check when a
+**If the user has no archive and no local `.osm.pbf`, offer to download an
+extract from Geofabrik** rather than stopping:
+
+```
+scripts/fetch-extract.sh --search minnesota     # find the region
+scripts/fetch-extract.sh --info us/minnesota    # URL + real download size
+scripts/fetch-extract.sh us/minnesota           # download, md5-verified
+scripts/build-archive.sh <the .osm.pbf>         # compile archive + sidecar
+```
+
+Ask before downloading. Extracts run from a few MB for a city to several GB for
+a continent, so use `--info` to get the size, tell the user the size and
+destination, and wait for a yes. Prefer the smallest extract that covers the
+subject.
+
+`references/setup.md` has the rest: toolchain details, sidecar options, the
+`osmflatc`/`osmflat-extc` version-agreement rule, and what to check when a
 render comes back blank.
 
 ## Four things that will bite you

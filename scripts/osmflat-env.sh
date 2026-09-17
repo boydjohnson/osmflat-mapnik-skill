@@ -181,6 +181,53 @@ osmflat_font_dir() {
     [ -d "$dir/fonts" ] && echo "$dir/fonts" || true
 }
 
+# osmflat_version <path> -- the bare version string, e.g. 0.300.0
+# Reads stderr too: older osmflatc builds print --version there, and discarding
+# it made this return empty, which silently defeated the check below.
+# Only a dotted-numeric field counts: a missing or broken binary prints an
+# error whose last word ("directory", "found") would otherwise pass as a version.
+osmflat_version() {
+    "$1" --version 2>&1 | awk 'NR==1{v=$NF; if (v ~ /^v?[0-9]+(\.[0-9]+)+$/) {sub(/^v/,"",v); print v}}'
+}
+
+# osmflatc and osmflat-extc share a flatdata schema and are released in
+# lockstep, so a mismatch produces an unreadable multi-hundred-line schema diff
+# from deep inside the sidecar build. Catch it up front.
+#
+# This is easy to hit precisely because PATH beats the managed install dir: a
+# forgotten `cargo install osmflatc` from years ago silently shadows the
+# release. Deliberate dev builds are the point of that ordering, so this warns
+# with the real paths rather than overriding the choice.
+osmflat_check_versions() {
+    local a="$1" b="$2" va vb
+    [ -n "${OSMFLAT_SKIP_VERSION_CHECK:-}" ] && return 0
+    va="$(osmflat_version "$a")"; vb="$(osmflat_version "$b")"
+    # Explicit if, not an && / || chain: under `set -e` a false chain used as a
+    # statement exits the shell before the error below is ever reached.
+    if [ "$va" = "$vb" ]; then
+        return 0
+    fi
+    # An undeterminable version is not a pass: warn and continue rather than
+    # either blocking a custom build or pretending the pair agrees.
+    if [ -z "$va" ] || [ -z "$vb" ]; then
+        osmflat_log "warning: could not read a version from ${a##*/} (${va:-?}) or ${b##*/} (${vb:-?});"
+        osmflat_log "  skipping the compatibility check. A schema mismatch will surface as a"
+        osmflat_log "  large WrongSignature diff during the sidecar build."
+        return 0
+    fi
+    osmflat_die "version mismatch between the archive and sidecar compilers:
+  osmflatc      $va   $a
+  osmflat-extc  $vb   $b
+They must agree on the flatdata schema; mixing them fails with a large
+WrongSignature schema diff partway through the build.
+
+A binary on PATH takes precedence over the managed install, so a stale
+\`cargo install\` is the usual cause. Force the managed release with:
+  OSMFLAT_BIN_OSMFLATC=$OSMFLAT_BINDIR/osmflatc \\
+  OSMFLAT_BIN_OSMFLAT_EXTC=$OSMFLAT_BINDIR/osmflat-extc scripts/build-archive.sh ...
+or upgrade/remove the stale one. Set OSMFLAT_SKIP_VERSION_CHECK=1 to override."
+}
+
 # -------------------------------------------------------------------- data ---
 
 # The archive to render/introspect. Explicit env wins; otherwise a lone *.flat
