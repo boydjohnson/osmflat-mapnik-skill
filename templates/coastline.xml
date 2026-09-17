@@ -1,0 +1,105 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Land/water fill via the synthetic land layer (SKILL.md §4).
+
+     natural=coastline ways mark a boundary, not a fillable area, so there is no
+     polygon to paint for "everything on the land side". Instead: paint the Map
+     background water, then fill precomputed land rings on top of it.
+
+     Requires an Ext sidecar built with land rings:
+       --land-polygons <shapefile>  closes the mainland too (preferred)
+       --coastline                  closes islands and lakes ONLY -- a mainland
+                                    coastline is an open chain across any
+                                    bounded extract and can never close by ring
+                                    assembly alone, so the mainland stays water
+     Without either, this layer returns zero features: no error, just an
+     all-water image. Verify over a known landmass before trusting it.
+
+     order=way_area draws largest ring first, so a plain painter's algorithm
+     nests islands (and lakes on islands) correctly with no hole/exterior
+     pairing. Real water layers go AFTER land so named lakes and bays draw on
+     top of the land fill. -->
+<Map background-color="#a8cfe0" srs="+proj=longlat +datum=WGS84 +no_defs">
+
+  <Style name="land">
+    <Rule>
+      <Filter>[_osmflat_land]='yes'</Filter>
+      <PolygonSymbolizer fill="#efe9dd"/>
+    </Rule>
+  </Style>
+
+  <Style name="water">
+    <Rule>
+      <Filter>[natural]='water' or [natural]='bay' or [landuse]='reservoir'</Filter>
+      <PolygonSymbolizer fill="#a8cfe0"/>
+      <LineSymbolizer stroke="#8fb2d4" stroke-width="0.4"/>
+    </Rule>
+  </Style>
+
+  <Style name="waterway">
+    <Rule>
+      <Filter>[waterway]='river' or [waterway]='stream' or [waterway]='canal'</Filter>
+      <LineSymbolizer stroke="#a8cfe0" stroke-width="1.2" stroke-linecap="round"/>
+    </Rule>
+  </Style>
+
+  <Style name="water-label">
+    <Rule>
+      <!-- Gate labels, or a wide bbox drowns in them (SKILL.md: scale
+           denominators here are degree-based; ~6 is region, ~1.25 is city). -->
+      <MaxScaleDenominator>6</MaxScaleDenominator>
+      <Filter>[name]!=''</Filter>
+      <TextSymbolizer face-name="DejaVu Sans Book" size="11" fill="#31607a"
+                      halo-fill="#ffffff" halo-radius="1.2"
+                      placement="interior">[name]</TextSymbolizer>
+    </Rule>
+  </Style>
+
+  <!-- 1. Land first: one closed way per precomputed ring, biggest underneath. -->
+  <Layer name="land" srs="+proj=longlat +datum=WGS84 +no_defs">
+    <StyleName>land</StyleName>
+    <Datasource>
+      <Parameter name="type">osmflat</Parameter>
+      <Parameter name="file">@ARCHIVE@</Parameter>
+      <Parameter name="ext">@EXT@</Parameter>
+      <!-- Magic key: no real OSM entity ever carries _osmflat_land. -->
+      <Parameter name="tags">_osmflat_land=yes</Parameter>
+      <Parameter name="order">way_area</Parameter>
+    </Datasource>
+  </Layer>
+
+  <!-- 2. Real water bodies on top, so named lakes/bays punch back through. -->
+  <Layer name="water" srs="+proj=longlat +datum=WGS84 +no_defs">
+    <StyleName>water</StyleName>
+    <Datasource>
+      <Parameter name="type">osmflat</Parameter>
+      <Parameter name="file">@ARCHIVE@</Parameter>
+      <Parameter name="ext">@EXT@</Parameter>
+      <Parameter name="osm_type">way,relation</Parameter>
+      <Parameter name="tags">natural=water,natural=bay,landuse=reservoir</Parameter>
+      <Parameter name="order">way_area</Parameter>
+    </Datasource>
+  </Layer>
+
+  <Layer name="waterway" srs="+proj=longlat +datum=WGS84 +no_defs">
+    <StyleName>waterway</StyleName>
+    <Datasource>
+      <Parameter name="type">osmflat</Parameter>
+      <Parameter name="file">@ARCHIVE@</Parameter>
+      <Parameter name="ext">@EXT@</Parameter>
+      <Parameter name="osm_type">way</Parameter>
+      <Parameter name="tags">waterway=river,waterway=stream,waterway=canal</Parameter>
+    </Datasource>
+  </Layer>
+
+  <Layer name="water-label" srs="+proj=longlat +datum=WGS84 +no_defs">
+    <StyleName>water-label</StyleName>
+    <Datasource>
+      <Parameter name="type">osmflat</Parameter>
+      <Parameter name="file">@ARCHIVE@</Parameter>
+      <Parameter name="ext">@EXT@</Parameter>
+      <Parameter name="osm_type">way,relation</Parameter>
+      <Parameter name="tags">natural=water,natural=bay</Parameter>
+    </Datasource>
+  </Layer>
+
+</Map>

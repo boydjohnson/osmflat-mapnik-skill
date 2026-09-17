@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Thematic starter: a faint context basemap + one highlighted theme.
+     Replace the THEME layer's filters/tags with your subject (found via taginfo).
+     @ARCHIVE@ / @EXT@ are substituted by render.sh. -->
+<Map background-color="#f4f2ee" srs="+proj=longlat +datum=WGS84 +no_defs">
+
+  <!-- Faint context: all roads, thin gray. -->
+  <Style name="context">
+    <Rule>
+      <Filter>[highway]!=''</Filter>
+      <LineSymbolizer stroke="#dddddd" stroke-width="0.5"/>
+    </Rule>
+  </Style>
+
+  <!-- THEME: edit this. Example = cycling infrastructure. -->
+  <Style name="theme">
+    <Rule>
+      <Filter>[highway]='cycleway' or [bicycle]='designated'</Filter>
+      <LineSymbolizer stroke="#1f7a3d" stroke-width="1.6" stroke-linejoin="round"/>
+    </Rule>
+  </Style>
+
+  <Layer name="context" srs="+proj=longlat +datum=WGS84 +no_defs">
+    <StyleName>context</StyleName>
+    <Datasource>
+      <Parameter name="type">osmflat</Parameter>
+      <Parameter name="file">@ARCHIVE@</Parameter>
+      <Parameter name="ext">@EXT@</Parameter>
+      <Parameter name="osm_type">way</Parameter>
+      <Parameter name="tags">highway=*</Parameter>
+    </Datasource>
+  </Layer>
+
+  <Layer name="theme" srs="+proj=longlat +datum=WGS84 +no_defs">
+    <StyleName>theme</StyleName>
+    <Datasource>
+      <Parameter name="type">osmflat</Parameter>
+      <Parameter name="file">@ARCHIVE@</Parameter>
+      <Parameter name="ext">@EXT@</Parameter>
+      <Parameter name="osm_type">way</Parameter>
+      <!-- tags MUST be a superset of the theme rules' filters (perf prefilter). -->
+      <Parameter name="tags">highway=cycleway,bicycle=*</Parameter>
+    </Datasource>
+  </Layer>
+
+</Map>
