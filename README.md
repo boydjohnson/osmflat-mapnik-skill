@@ -59,7 +59,12 @@ conventions that cause the most wasted renders. The detail lives alongside it:
 
 ## License
 
-Licensed under the [Apache License, Version 2.0](LICENSE).
+Licensed under either of [Apache License, Version 2.0](LICENSE-APACHE) or
+[MIT](LICENSE-MIT) at your option, matching the rest of the osmflat projects.
+
+Unless you explicitly state otherwise, any contribution intentionally submitted
+for inclusion in this work by you, as defined in the Apache-2.0 license, shall
+be dual licensed as above, without any additional terms or conditions.
 
 `templates/basemap.xml` is carried over from
 [osmflat-mapnik-plugin](https://github.com/boydjohnson/osmflat-mapnik-plugin)
