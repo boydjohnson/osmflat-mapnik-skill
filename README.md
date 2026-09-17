@@ -39,5 +39,12 @@ scripts/taginfo.sh key highway values --format table --sortname count --sortorde
 scripts/render.sh templates/basemap.xml out.png -93.30 44.95 -93.24 45.00
 ```
 
-See [SKILL.md](SKILL.md) for the datasource parameters, the geometry model, the
-coastline/land-fill pattern, and the scale-gating conventions.
+[SKILL.md](SKILL.md) is the entry point — the render loop and the handful of
+conventions that cause the most wasted renders. The detail lives alongside it:
+
+| file | covers |
+|---|---|
+| [references/setup.md](references/setup.md) | toolchain install, building an archive + sidecar, debugging a blank render |
+| [references/datasource.md](references/datasource.md) | `<Layer>` datasource params, taginfo queries, synthetic attributes, geometry model |
+| [references/cartography.md](references/cartography.md) | scale gating, casings, labels, symbolizer cookbook |
+| [references/coastline.md](references/coastline.md) | land/water fill where the map touches a coast |
