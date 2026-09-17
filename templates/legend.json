@@ -1,5 +1,5 @@
 {
-  "_comment": "Legend spec for templates/basemap.xml. Colors come from the style at run time; only these labels are curated. Build your own with: scripts/add-legend.py --xml <style> --list",
+  "_comment": "Legend spec for templates/basemap.xml. Colors come from the style at run time; only these labels are curated. Build your own with: uv run scripts/add-legend.py --xml <style> --list",
   "title": "Legend",
   "position": "sw",
   "entries": [

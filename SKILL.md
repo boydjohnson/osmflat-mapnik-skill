@@ -32,9 +32,9 @@ look at the PNG, and iterate. Work the loop — don't try to one-shot a style.
 
 Scratch styles and PNGs go in the scratchpad dir, not the repo.
 
-Once the map itself reads well, `scripts/add-legend.py` can draw a legend panel
-onto the PNG — swatch colors are pulled from the style, so it stays in sync.
-See `references/legend.md`.
+Once the map itself reads well, `uv run scripts/add-legend.py` can draw a
+legend panel onto the PNG — swatch colors are pulled from the style, so it
+stays in sync. See `references/legend.md`.
 
 ## Setup
 

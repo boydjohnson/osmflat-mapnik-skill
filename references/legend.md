@@ -5,15 +5,26 @@ are read from the style XML at run time, so the legend cannot drift from the
 palette; only the human labels are curated, since those can't be derived from a
 Filter expression.
 
-Needs Pillow (`pip install pillow`). It is a post-processing step — render
-first, then attach.
+It is a post-processing step — render first, then attach.
+
+Run it with `uv`. Pillow is declared inline in the script (PEP 723), so `uv
+run` fetches it into a throwaway environment: nothing to install first, and
+nothing added to the system Python. The shebang does the same, so
+`./scripts/add-legend.py` works directly wherever `uv` is on PATH.
+
+```
+uv run scripts/add-legend.py --xml style.xml --list
+```
+
+Without `uv`, `python3 scripts/add-legend.py ...` still works provided Pillow
+is installed; the script says so if it isn't.
 
 ## Workflow
 
 1. **Inspect the style** to see what can go in the legend. Don't guess style
    names or rule indices:
    ```
-   scripts/add-legend.py --xml style.xml --list
+   uv run scripts/add-legend.py --xml style.xml --list
    ```
    It prints every `<Style>`, each `Rule` with its index, the filter it matches,
    the colors it draws, and a suggested swatch `kind`.
@@ -22,7 +33,7 @@ first, then attach.
 3. **Render, then attach:**
    ```
    scripts/render.sh style.xml out.png -93.30 44.95 -93.24 45.00
-   scripts/add-legend.py --xml style.xml --png out.png --spec legend.json
+   uv run scripts/add-legend.py --xml style.xml --png out.png --spec legend.json
    ```
 
 ## Spec format

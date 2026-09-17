@@ -1,4 +1,8 @@
-#!/usr/bin/env python3
+#!/usr/bin/env -S uv run --script
+# /// script
+# requires-python = ">=3.9"
+# dependencies = ["pillow>=10"]
+# ///
 """Draw a legend panel onto a rendered map PNG.
 
 Swatch colors are read live from the style XML (by <Style> name and Rule index)
@@ -10,10 +14,13 @@ Idempotent: the first run caches the legend-free render alongside the target as
 never stacks legends. Re-rendering the map overwrites the target with a fresh
 legend-free image, which is detected and refreshes the cache automatically.
 
-  add-legend.py --xml style.xml --list
-  add-legend.py --xml style.xml --png out.png --spec legend.json
+  uv run scripts/add-legend.py --xml style.xml --list
+  uv run scripts/add-legend.py --xml style.xml --png out.png --spec legend.json
 
-Needs Pillow (`pip install pillow`).
+Pillow is declared inline (PEP 723), so `uv run` fetches it into a throwaway
+environment -- nothing to install and nothing added to the system Python. The
+shebang does the same, so ./add-legend.py works directly where uv is present.
+Without uv, plain `python3 add-legend.py` still works if Pillow is installed.
 """
 import argparse
 import glob
@@ -26,7 +33,9 @@ from pathlib import Path
 try:
     from PIL import Image, ImageDraw, ImageFont, PngImagePlugin
 except ImportError:
-    sys.exit("add-legend.py needs Pillow: pip install pillow")
+    sys.exit("add-legend.py needs Pillow.\n"
+             "  uv run scripts/add-legend.py ...   (fetches it automatically)\n"
+             "  or: pip install pillow")
 
 LEGEND_MARKER_KEY = "osmflat-legend-attached"
 LEGEND_MARKER_VALUE = "v1"
