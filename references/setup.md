@@ -17,9 +17,53 @@ against the release `SHA256SUMS`. Resolution order per tool is an explicit
 `OSMFLAT_BIN_<TOOL>` override, then `PATH`, then the managed install dir, then
 download — so a local dev build on `PATH` shadows the release.
 
-Prebuilt targets are macOS arm64 and Linux x86_64/aarch64; anything else has to
-be built from source and put on `PATH`. Set `GITHUB_TOKEN` if you hit the
-unauthenticated GitHub API rate limit.
+Set `GITHUB_TOKEN` if you hit the unauthenticated GitHub API rate limit.
+
+## Requirements
+
+### Platform
+
+The full toolchain has prebuilt releases for exactly two targets:
+
+| platform | status |
+|---|---|
+| **macOS arm64** (Apple Silicon) | all four tools |
+| **Linux x86_64** | all four tools |
+| Linux aarch64 | `render` only — `osmflatc`, `osmflat-extc` and `osmflat-taginfo` have no release build |
+| macOS x86_64 (Intel) | no releases at all |
+
+On an unsupported platform the installer names the missing target rather than
+failing on a 404; build that tool from source and put it on `PATH`, where it
+takes precedence over the managed install.
+
+Note the release target triples are not uniform across the four repos (gnu vs
+musl, with and without the vendor field), so they are mapped per tool.
+
+### Commands
+
+Required by everything:
+
+| command | used for |
+|---|---|
+| `bash` | all scripts (arrays and indirect expansion, so not `sh`) |
+| `curl` | downloading releases and extracts |
+| `tar` | unpacking releases |
+| `sha256sum` **or** `shasum` | verifying release checksums; the install refuses to proceed without one |
+
+Plus the usual POSIX text tools (`awk`, `sed`, `grep`, `find`, `stat`,
+`mktemp`, …), which every supported platform already has.
+
+Optional, per feature:
+
+| command | needed for | without it |
+|---|---|---|
+| `uv` | `add-legend.py`, which declares Pillow inline (PEP 723) | use `python3` with Pillow installed |
+| `python3` | `fonts.sh`; Geofabrik region lookup in `fetch-extract.sh` | `fonts.sh` fails; lookup falls back to `jq` |
+| `jq` | alternative to `python3` for region lookup | `--search` is unavailable, and a bare id like `monaco` no longer resolves — give the full path, `europe/monaco` |
+| `md5sum` **or** `md5` | checking a downloaded extract against Geofabrik's `.md5` | the check is skipped with a warning |
+
+Nothing here needs a system mapnik: the `render` release has it statically
+linked with the osmflat plugin compiled in, and ships its own fonts.
 
 ## Data
 

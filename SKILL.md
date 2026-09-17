@@ -39,7 +39,9 @@ stays in sync. See `references/legend.md`.
 ## Setup
 
 The scripts install the four binaries they need from GitHub releases on first
-use, so usually there is nothing to do. The one thing you must supply is data:
+use, so usually there is nothing to do. Prebuilt releases cover **macOS arm64
+and Linux x86_64** only; `references/setup.md` has the full requirements,
+including `uv` for the legend script. The one thing you must supply is data:
 
 ```
 export OSMFLAT_ARCHIVE=/path/to/area.osm.flat

@@ -7,7 +7,8 @@
 #
 # A region can be given as a Geofabrik id (`us/minnesota`), a full path
 # (`north-america/us/minnesota`), or a complete .osm.pbf URL. Default dest-dir
-# is $OSMFLAT_HOME/data.
+# is $OSMFLAT_HOME/data. Resolving a bare id reads Geofabrik's index and so
+# needs python3 or jq; a full path or URL needs neither.
 #
 # ASK THE USER FIRST. Extracts are large -- a US state is a few hundred MB, a
 # continent is several GB. Use --info to get the real size, tell the user the
@@ -174,6 +175,9 @@ mv "$PBF.part" "$PBF"
 # Geofabrik publishes an .md5 beside every extract.
 if want="$(curl -fsSL "$URL.md5" 2>/dev/null | awk '{print $1}')" && [ -n "$want" ]; then
     got="$(_gf_md5 "$PBF")"
+    if [ -z "$got" ]; then
+        osmflat_log "warning: no md5sum or md5 command; skipping integrity check"
+    fi
     if [ -n "$got" ] && [ "$want" != "$got" ]; then
         rm -f "$PBF"
         osmflat_die "md5 mismatch for $(basename "$URL")

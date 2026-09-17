@@ -18,8 +18,22 @@ first use — checksum-verified, into `${XDG_DATA_HOME:-~/.local/share}/osmflat`
 | `osmflatc` | [osmflat-rs](https://github.com/boydjohnson/osmflat-rs) |
 | `osmflat-extc` | [osmflat-ext](https://github.com/boydjohnson/osmflat-ext) |
 
-`scripts/install.sh` pre-warms or upgrades them all. Prebuilt targets: macOS
-arm64, Linux x86_64/aarch64.
+`scripts/install.sh` pre-warms or upgrades them all.
+
+### Requirements
+
+- **macOS arm64 or Linux x86_64.** Those are the two platforms with prebuilt
+  releases of all four tools. Linux aarch64 has `render` only; Intel macOS has
+  none. Anything else means building from source.
+- `bash`, `curl`, `tar`, and `sha256sum`/`shasum`.
+- [`uv`](https://docs.astral.sh/uv/) for `scripts/add-legend.py`, which
+  declares Pillow inline — or `python3` with Pillow already installed.
+- `python3` for `scripts/fonts.sh` and Geofabrik region search (`jq` also works
+  for the latter).
+
+No system mapnik needed: the `render` release is statically linked and ships
+its own fonts. See [references/setup.md](references/setup.md) for the full
+table.
 
 ## Data
 
