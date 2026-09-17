@@ -70,8 +70,9 @@ wasted renders:
   `render.sh` prints the actual value for the bbox you just rendered.
 - **`tags` must be a superset of the layer's `<Filter>`s.** It's a performance
   prefilter; narrower than the filters it feeds, it drops features silently.
-- **`TextSymbolizer` needs `face-name="DejaVu Sans Book"`.** No face-name, no
-  text — silently.
+- **Font face-names are exact, and a wrong one renders no text and no error.**
+  Regular weight is `Book`, not `Regular`; Sans slants are `Oblique` while
+  Serif slants are `Italic`. Run `scripts/fonts.sh` instead of guessing.
 - **A blank PNG is a query that matched nothing**, not a render failure: bbox
   outside the extract, over-narrow `tags`, missing sidecar, or a stale archive.
 
@@ -82,6 +83,7 @@ wasted renders:
 | `references/setup.md` | toolchain install, building an archive + sidecar, debugging a blank render |
 | `references/datasource.md` | choosing `<Layer>` datasource params, taginfo queries, synthetic attributes, geometry model |
 | `references/cartography.md` | scale gating, casings, labels, and the symbolizer cookbook |
+| `references/fonts.md` | any `TextSymbolizer`: exact face-names, script coverage, non-Latin fallback |
 | `references/coastline.md` | the map touches a coast and land/water must read correctly |
 
 ## Templates

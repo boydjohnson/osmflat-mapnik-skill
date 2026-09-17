@@ -55,6 +55,7 @@ conventions that cause the most wasted renders. The detail lives alongside it:
 | [references/setup.md](references/setup.md) | toolchain install, building an archive + sidecar, debugging a blank render |
 | [references/datasource.md](references/datasource.md) | `<Layer>` datasource params, taginfo queries, synthetic attributes, geometry model |
 | [references/cartography.md](references/cartography.md) | scale gating, casings, labels, symbolizer cookbook |
+| [references/fonts.md](references/fonts.md) | face-names, script coverage, non-Latin font fallback |
 | [references/coastline.md](references/coastline.md) | land/water fill where the map touches a coast |
 
 ## License

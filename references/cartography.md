@@ -24,9 +24,10 @@ uncapped so it carries the state and country views.
 - **Casing = two `<Style>` passes**, not two symbolizers in one rule: a
   `casing` style (wide dark stroke) then a `fill` style (narrow colored) on the
   same layer, so casings tuck under fills at intersections. Add `order=z_order`.
-- **Fonts**: `TextSymbolizer` needs `face-name="DejaVu Sans Book"` (bundled
-  with the `render` release; `render.sh` points mapnik at it). No text renders
-  without a valid face-name.
+- **Fonts**: a `face-name` mapnik cannot resolve renders no text and no error.
+  Regular weight is `Book` (`DejaVu Sans Book`), Sans slants are `Oblique` and
+  Serif slants are `Italic`. List the real names with `scripts/fonts.sh`; see
+  `references/fonts.md` for coverage and non-Latin fallback.
 - **Area labels**: `placement="interior"` works on relation polygons (and
   best-effort on closed ways). Road labels use `placement="line"`.
 - **`MarkersSymbolizer`** logs a benign `SVG parse error: … 100%` — ignore it;
