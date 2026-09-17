@@ -56,3 +56,13 @@ conventions that cause the most wasted renders. The detail lives alongside it:
 | [references/datasource.md](references/datasource.md) | `<Layer>` datasource params, taginfo queries, synthetic attributes, geometry model |
 | [references/cartography.md](references/cartography.md) | scale gating, casings, labels, symbolizer cookbook |
 | [references/coastline.md](references/coastline.md) | land/water fill where the map touches a coast |
+
+## License
+
+Licensed under the [Apache License, Version 2.0](LICENSE).
+
+`templates/basemap.xml` is carried over from
+[osmflat-mapnik-plugin](https://github.com/boydjohnson/osmflat-mapnik-plugin)
+(MIT). Map data fetched by `scripts/fetch-extract.sh` is OpenStreetMap, under
+the [ODbL](https://www.openstreetmap.org/copyright) — that license covers the
+data, not this skill.

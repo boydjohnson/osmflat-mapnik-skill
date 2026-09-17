@@ -1,6 +1,7 @@
 ---
 name: osmflat-mapnik-skill
 description: Create and iterate on Mapnik map styles rendered from an OpenStreetMap extract through the osmflat datasource. Introspect the OSM tag vocabulary with osmflat-taginfo, draft a Mapnik XML style, render it to a PNG, then Read the PNG and refine. Use when asked to make/design/tweak a map, basemap, or thematic map (e.g. "cycling map of Mexico City", "show water and parks", "roads colored by class", "where are the hospitals") from an osmflat archive.
+license: Apache-2.0
 ---
 
 # OSM map styling (osmflat + Mapnik)
