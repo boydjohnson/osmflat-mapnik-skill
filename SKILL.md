@@ -32,6 +32,10 @@ look at the PNG, and iterate. Work the loop — don't try to one-shot a style.
 
 Scratch styles and PNGs go in the scratchpad dir, not the repo.
 
+Once the map itself reads well, `scripts/add-legend.py` can draw a legend panel
+onto the PNG — swatch colors are pulled from the style, so it stays in sync.
+See `references/legend.md`.
+
 ## Setup
 
 The scripts install the four binaries they need from GitHub releases on first
@@ -84,6 +88,7 @@ wasted renders:
 | `references/datasource.md` | choosing `<Layer>` datasource params, taginfo queries, synthetic attributes, geometry model |
 | `references/cartography.md` | scale gating, casings, labels, and the symbolizer cookbook |
 | `references/fonts.md` | any `TextSymbolizer`: exact face-names, script coverage, non-Latin fallback |
+| `references/legend.md` | adding a legend panel to a finished render |
 | `references/coastline.md` | the map touches a coast and land/water must read correctly |
 
 ## Templates
@@ -93,3 +98,4 @@ wasted renders:
 - `templates/basemap.xml` — multi-scale general basemap: land/water, landuse,
   a road ramp with casings, scale-gated labels and POIs.
 - `templates/coastline.xml` — the land-fill pattern, minimal.
+- `templates/legend.json` — a legend spec for `basemap.xml`, to copy and edit.

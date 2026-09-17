@@ -1,0 +1,16 @@
+{
+  "_comment": "Legend spec for templates/basemap.xml. Colors come from the style at run time; only these labels are curated. Build your own with: scripts/add-legend.py --xml <style> --list",
+  "title": "Legend",
+  "position": "sw",
+  "entries": [
+    {"style": "landcover",    "rule": 0, "kind": "fill", "label": "Water"},
+    {"style": "landcover",    "rule": 1, "kind": "fill", "label": "Woodland"},
+    {"style": "landcover",    "rule": 2, "kind": "fill", "label": "Park / Grass"},
+    {"style": "buildings",    "rule": 0, "kind": "fill", "label": "Buildings"},
+    {"style": "streets-fill", "rule": 0, "kind": "line", "label": "Motorway / Trunk"},
+    {"style": "streets-fill", "rule": 1, "kind": "line", "label": "Primary"},
+    {"style": "streets-fill", "rule": 2, "kind": "line", "label": "Secondary"},
+    {"style": "streets-fill", "rule": 4, "kind": "line", "label": "Residential"},
+    {"style": "pois",         "rule": 0, "kind": "dot",  "label": "Point of Interest"}
+  ]
+}
