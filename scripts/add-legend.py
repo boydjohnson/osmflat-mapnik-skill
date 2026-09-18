@@ -58,10 +58,20 @@ def find_font_dir(explicit=None):
     return None
 
 
+def _find_file(font_dir, name):
+    """Search recursively and through symlinks, as mapnik does -- the combined
+    $OSMFLAT_HOME/fonts keeps DejaVu one level down, in dejavu/."""
+    for root, _dirs, files in os.walk(font_dir, followlinks=True):
+        if name in files:
+            return Path(root) / name
+    return None
+
+
 def load_fonts(font_dir, title_size, label_size):
     if font_dir:
-        regular, bold = font_dir / "DejaVuSans.ttf", font_dir / "DejaVuSans-Bold.ttf"
-        if regular.exists() and bold.exists():
+        regular = _find_file(font_dir, "DejaVuSans.ttf")
+        bold = _find_file(font_dir, "DejaVuSans-Bold.ttf")
+        if regular and bold:
             return (ImageFont.truetype(str(bold), title_size),
                     ImageFont.truetype(str(regular), label_size))
     print("warning: DejaVu not found; falling back to Pillow's default bitmap font.\n"

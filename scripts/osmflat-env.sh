@@ -213,11 +213,27 @@ EOF
     echo "$path"
 }
 
-# Fonts ship beside the packaged render binary; mapnik needs an explicit dir
-# when render is reached through the bin/ symlink.
+# osmflat_font_dir <render> -- the directory mapnik should register fonts from.
+#
+# DejaVu ships beside the packaged render binary; mapnik needs an explicit dir
+# when render is reached through the bin/ symlink. Once fetch-fonts.sh has put
+# anything in $OSMFLAT_HOME/fonts/google, the answer is $OSMFLAT_HOME/fonts
+# instead: mapnik registers it recursively and follows the dejavu/ symlink kept
+# here, so fetched fonts are added to DejaVu rather than replacing it.
 osmflat_font_dir() {
-    local render="$1" dir target
+    local render="$1" bundled
     [ -n "${MAPNIK_FONT_DIR:-}" ] && { echo "$MAPNIK_FONT_DIR"; return 0; }
+    bundled="$(_osmflat_bundled_fonts "$render")"
+    if [ -n "$(find "$OSMFLAT_HOME/fonts/google" -maxdepth 1 \( -name '*.ttf' -o -name '*.otf' -o -name '*.ttc' \) 2>/dev/null | head -1)" ]; then
+        # Re-pointed on every use, so a render upgrade can't leave it dangling.
+        [ -n "$bundled" ] && ln -sfn "$bundled" "$OSMFLAT_HOME/fonts/dejavu"
+        echo "$OSMFLAT_HOME/fonts"; return 0
+    fi
+    [ -n "$bundled" ] && echo "$bundled" || true
+}
+
+_osmflat_bundled_fonts() {
+    local render="$1" dir target
     dir="$(cd "$(dirname "$render")" && pwd)"
     target="$(readlink "$render" 2>/dev/null || true)"
     if [ -n "$target" ]; then

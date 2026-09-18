@@ -61,8 +61,10 @@ and published by the same author as this skill:
   comes from the same release.
 - **Network access** is limited to `api.github.com` and `github.com` (for the
   releases, which download from `release-assets.githubusercontent.com`),
-  `download.geofabrik.de` (map extracts, only when the user asks), and PyPI
-  through `uv` (Pillow, for the legend script). Nothing is uploaded.
+  `download.geofabrik.de` (map extracts, only when the user asks),
+  `fonts.googleapis.com` and `fonts.gstatic.com` (extra fonts, only when the
+  user asks), and PyPI through `uv` (Pillow, for the legend script). Nothing
+  is uploaded.
 - **Alternative:** build a tool from source and put it on `PATH`. A copy on
   `PATH` is always used first, and nothing gets downloaded for it.
 
@@ -109,8 +111,10 @@ wasted renders:
 - **`tags` must be a superset of the layer's `<Filter>`s.** It's a performance
   prefilter; narrower than the filters it feeds, it drops features silently.
 - **Font face-names are exact, and a wrong one renders no text and no error.**
-  Regular weight is `Book`, not `Regular`; Sans slants are `Oblique` while
-  Serif slants are `Italic`. Run `scripts/fonts.sh` instead of guessing.
+  In the bundled DejaVu, regular weight is `Book`, not `Regular`; Sans slants
+  are `Oblique` while Serif slants are `Italic`. Run `scripts/fonts.sh` instead
+  of guessing. DejaVu has no CJK, Thai or Devanagari; with the user's OK,
+  `scripts/fetch-fonts.sh` adds Noto fonts for those (`references/fonts.md`).
 - **A blank PNG is a query that matched nothing**, not a render failure: bbox
   outside the extract, over-narrow `tags`, missing sidecar, or a stale archive.
 

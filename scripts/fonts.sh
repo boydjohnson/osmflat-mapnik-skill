@@ -88,11 +88,16 @@ def faces(path):
 
 d, show_files = sys.argv[1], sys.argv[2] == "1"
 rows = []
-for fn in sorted(os.listdir(d)):
-    if os.path.splitext(fn)[1].lower() not in (".ttf", ".otf", ".ttc"):
-        continue
-    for face in faces(os.path.join(d, fn)):
-        rows.append((face, fn))
+# Recursive and through symlinked directories, the way mapnik registers them,
+# so this lists exactly the faces render can resolve.
+for root, dirs, files in os.walk(d, followlinks=True):
+    dirs.sort()
+    for fn in sorted(files):
+        if os.path.splitext(fn)[1].lower() not in (".ttf", ".otf", ".ttc"):
+            continue
+        rel = os.path.relpath(os.path.join(root, fn), d)
+        for face in faces(os.path.join(root, fn)):
+            rows.append((face, rel))
 if not rows:
     print("no fonts found", file=sys.stderr); raise SystemExit(1)
 w = max(len(r[0]) for r in rows)
