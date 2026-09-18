@@ -26,7 +26,10 @@ if [ -z "$DIR" ]; then
     if [ -n "${MAPNIK_FONT_DIR:-}" ]; then
         DIR="$MAPNIK_FONT_DIR"
     else
-        DIR="$(osmflat_font_dir "$(osmflat_need render)")"
+        # Two steps: a failure inside a nested $(...) is not caught by set -e,
+        # which would bury the "not installed" message under a second error.
+        RENDER="$(osmflat_need render)"
+        DIR="$(osmflat_font_dir "$RENDER")"
     fi
 fi
 [ -n "$DIR" ] && [ -d "$DIR" ] || osmflat_die "no font directory found (looked at: ${DIR:-none})"

@@ -2,8 +2,12 @@
 
 ## Toolchain
 
-The scripts install what they need from GitHub releases on first use — nothing
-to do ahead of time. `scripts/install.sh` pre-warms or upgrades all four:
+The four tools come from GitHub releases and are installed only by
+`scripts/install.sh`, with the user's agreement. A script that needs a missing
+tool stops with exit code 3 and says so. `scripts/install.sh --info` shows what
+would be downloaded (repo, tag, file, size) without fetching anything. Run
+`scripts/install.sh` again later to upgrade. Set `OSMFLAT_AUTO_INSTALL=1` to
+install on first use instead.
 
 | binary | repo | role |
 |---|---|---|

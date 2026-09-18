@@ -36,12 +36,44 @@ Once the map itself reads well, `uv run scripts/add-legend.py` can draw a
 legend panel onto the PNG — swatch colors are pulled from the style, so it
 stays in sync. See `references/legend.md`.
 
+## What this skill installs
+
+The scripts drive four prebuilt command-line tools. All four are open source
+and published by the same author as this skill:
+
+| tool | source | license |
+|---|---|---|
+| `render` | https://github.com/boydjohnson/osmflat-mapnik-plugin/releases | MIT; statically links mapnik (LGPL-2.1) |
+| `osmflat-taginfo` | https://github.com/boydjohnson/osmflat-taginfo/releases | MIT OR Apache-2.0 |
+| `osmflatc` | https://github.com/boydjohnson/osmflat-rs/releases | MIT OR Apache-2.0 |
+| `osmflat-extc` | https://github.com/boydjohnson/osmflat-ext/releases | MIT OR Apache-2.0 |
+
+- **Nothing is installed without the user's OK.** If a tool is missing, the
+  script that needs it stops (exit code 3) and says so. Then run
+  `scripts/install.sh --info` to show the user exactly what would be
+  downloaded: repo, release tag, file and size. Install with
+  `scripts/install.sh` only after they agree.
+- **What an install does:** it downloads the latest release for the platform,
+  checks it against that release's `SHA256SUMS`, and unpacks it into
+  `~/.local/share/osmflat` (or `$OSMFLAT_HOME`). No sudo, and no changes to
+  `PATH` or shell profiles. The checksum catches a corrupted download. It
+  does not protect against a compromised release, because the checksum file
+  comes from the same release.
+- **Network access** is limited to `api.github.com` and `github.com` (for the
+  releases, which download from `release-assets.githubusercontent.com`),
+  `download.geofabrik.de` (map extracts, only when the user asks), and PyPI
+  through `uv` (Pillow, for the legend script). Nothing is uploaded.
+- **Alternative:** build a tool from source and put it on `PATH`. A copy on
+  `PATH` is always used first, and nothing gets downloaded for it.
+
+Users who want the old install-on-first-use behavior can set
+`OSMFLAT_AUTO_INSTALL=1`.
+
 ## Setup
 
-The scripts install the four binaries they need from GitHub releases on first
-use, so usually there is nothing to do. Prebuilt releases cover **macOS arm64
-and Linux x86_64** only; `references/setup.md` has the full requirements,
-including `uv` for the legend script. The one thing you must supply is data:
+Prebuilt releases cover **macOS arm64 and Linux x86_64** only;
+`references/setup.md` has the full requirements, including `uv` for the legend
+script. The one thing you must supply is data:
 
 ```
 export OSMFLAT_ARCHIVE=/path/to/area.osm.flat

@@ -2,7 +2,7 @@
 # Shared bootstrap for the osmflat toolchain. Sourced by render.sh, taginfo.sh
 # and build-archive.sh; also runnable directly (see install.sh).
 #
-# Resolves four binaries, installing the latest GitHub release on first use:
+# Resolves four prebuilt binaries from GitHub releases:
 #
 #   render            boydjohnson/osmflat-mapnik-plugin   style.xml -> PNG
 #   osmflat-taginfo   boydjohnson/osmflat-taginfo         tag introspection
@@ -10,12 +10,17 @@
 #   osmflat-extc      boydjohnson/osmflat-ext             .osm.flat -> .ext sidecar
 #
 # Resolution order per tool: $OSMFLAT_BIN_<TOOL> override, then $PATH, then the
-# managed install dir, then download. So a local dev build on PATH always wins.
+# managed install dir. So a local dev build on PATH always wins.
+#
+# A missing tool is NOT downloaded implicitly: the calling script stops and says
+# how to install it (scripts/install.sh), so the user can agree to it first.
+# Set OSMFLAT_AUTO_INSTALL=1 to opt back into installing on first use.
 #
 # Env:
 #   OSMFLAT_HOME      install root  [${XDG_DATA_HOME:-~/.local/share}/osmflat]
 #   OSMFLAT_ARCHIVE   osmflat archive dir (required by render/taginfo)
 #   OSMFLAT_EXT       Ext sidecar dir     [guessed from the archive name]
+#   OSMFLAT_AUTO_INSTALL  1 = install a missing tool without asking
 #   GITHUB_TOKEN      raises the GitHub API rate limit (optional)
 
 set -euo pipefail
@@ -80,14 +85,6 @@ _osmflat_curl() {
     curl "${args[@]}" "$@"
 }
 
-# Asset download URLs of a repo's latest release, one per line.
-_osmflat_latest_assets() {
-    _osmflat_curl -H 'Accept: application/vnd.github+json' \
-        "https://api.github.com/repos/$1/releases/latest" \
-        | grep -o '"browser_download_url"[[:space:]]*:[[:space:]]*"[^"]*"' \
-        | sed 's/.*"\(https[^"]*\)".*/\1/'
-}
-
 _osmflat_sha256() {
     if command -v sha256sum >/dev/null 2>&1; then sha256sum "$1" | cut -d' ' -f1
     elif command -v shasum   >/dev/null 2>&1; then shasum -a 256 "$1" | cut -d' ' -f1
@@ -95,23 +92,60 @@ _osmflat_sha256() {
     fi
 }
 
+# _osmflat_resolve <tool> -- find the latest release asset for this platform.
+# Sets globals (a subshell would lose them): _OF_REPO _OF_TAG _OF_TARURL _OF_SUMURL
+_osmflat_resolve() {
+    local tool="$1" triple json assets
+    _OF_REPO="$(_osmflat_repo "$tool")"
+    triple="$(_osmflat_triple "$tool")"
+    command -v curl >/dev/null 2>&1 || osmflat_die "curl is required to install $tool"
+
+    json="$(_osmflat_curl -H 'Accept: application/vnd.github+json' \
+        "https://api.github.com/repos/$_OF_REPO/releases/latest")" \
+        || osmflat_die "could not reach the GitHub API for $_OF_REPO (rate limited? set GITHUB_TOKEN)"
+    _OF_TAG="$(printf '%s\n' "$json" | grep -m1 '"tag_name"' | sed 's/.*"tag_name"[^"]*"\([^"]*\)".*/\1/')"
+    assets="$(printf '%s\n' "$json" \
+        | grep -o '"browser_download_url"[[:space:]]*:[[:space:]]*"[^"]*"' \
+        | sed 's/.*"\(https[^"]*\)".*/\1/')"
+
+    _OF_TARURL="$(printf '%s\n' "$assets" | grep -- "-$triple\.tar\.gz\$" | head -1)"
+    _OF_SUMURL="$(printf '%s\n' "$assets" | grep -- '/SHA256SUMS$' | head -1)"
+    [ -n "$_OF_TARURL" ] || osmflat_die "latest $_OF_REPO release has no asset for $triple"
+    [ -n "$_OF_SUMURL" ] || osmflat_die "latest $_OF_REPO release has no SHA256SUMS"
+}
+
+_osmflat_human() {
+    awk -v b="${1:-0}" 'BEGIN{
+        if (b >= 1048576) printf "%.0f MB", b/1048576;
+        else if (b > 0) printf "%.0f KB", b/1024;
+        else printf "unknown size"; }'
+}
+
+# osmflat_plan <tool> -- describe exactly what osmflat_install would fetch,
+# without downloading it. This is what to show the user before asking.
+osmflat_plan() {
+    local tool="$1" size have
+    _osmflat_resolve "$tool"
+    # The last content-length is the asset itself; the first is the redirect.
+    size="$(_osmflat_curl -I "$_OF_TARURL" 2>/dev/null | tr -d '\r' \
+        | grep -i '^content-length:' | tail -1 | awk '{print $2}' || true)"
+    have="not installed"
+    [ -x "$OSMFLAT_BINDIR/$tool" ] && have="installed: $(readlink "$OSMFLAT_BINDIR/$tool" | cut -d/ -f3)"
+    echo "$tool  ($have)"
+    echo "  source   https://github.com/$_OF_REPO  (release $_OF_TAG)"
+    echo "  asset    ${_OF_TARURL##*/}  ($(_osmflat_human "$size"))"
+    echo "  checked  against that release's SHA256SUMS"
+    echo "  into     $OSMFLAT_PKGDIR/  (symlinked from $OSMFLAT_BINDIR/)"
+}
+
 # osmflat_install <tool> -- download, verify, unpack the latest release.
 osmflat_install() {
-    local tool="$1" repo triple assets tarurl sumurl tarball dir want got
-    repo="$(_osmflat_repo "$tool")"
-    triple="$(_osmflat_triple "$tool")"
+    local tool="$1" repo tarurl sumurl tarball dir want got
+    command -v tar >/dev/null 2>&1 || osmflat_die "tar is required to install $tool"
 
-    command -v curl >/dev/null 2>&1 || osmflat_die "curl is required to install $tool"
-    command -v tar  >/dev/null 2>&1 || osmflat_die "tar is required to install $tool"
-
-    osmflat_log "resolving latest $repo release..."
-    assets="$(_osmflat_latest_assets "$repo")" \
-        || osmflat_die "could not reach the GitHub API for $repo (rate limited? set GITHUB_TOKEN)"
-
-    tarurl="$(printf '%s\n' "$assets" | grep -- "-$triple\.tar\.gz\$" | head -1)"
-    sumurl="$(printf '%s\n' "$assets" | grep -- '/SHA256SUMS$' | head -1)"
-    [ -n "$tarurl" ] || osmflat_die "latest $repo release has no asset for $triple"
-    [ -n "$sumurl" ] || osmflat_die "latest $repo release has no SHA256SUMS"
+    osmflat_log "resolving latest $(_osmflat_repo "$tool") release..."
+    _osmflat_resolve "$tool"
+    repo="$_OF_REPO"; tarurl="$_OF_TARURL"; sumurl="$_OF_SUMURL"
 
     tarball="${tarurl##*/}"
     dir="${tarball%.tar.gz}"
@@ -147,7 +181,9 @@ Refusing to install. Re-run, or report it at https://github.com/$repo/issues"
     osmflat_log "installed $tool -> $OSMFLAT_PKGDIR/$dir"
 }
 
-# osmflat_need <tool> -- echo an executable path, installing on first use.
+# osmflat_need <tool> -- echo an executable path. A missing tool stops the
+# calling script (exit 3) with install instructions, unless
+# OSMFLAT_AUTO_INSTALL=1 permits installing it on the spot.
 osmflat_need() {
     local tool="$1" override path
     override="OSMFLAT_BIN_$(_osmflat_varname "$tool")"
@@ -157,6 +193,19 @@ osmflat_need() {
     fi
     if path="$(PATH="$PATH:$OSMFLAT_BINDIR" command -v "$tool" 2>/dev/null)"; then
         echo "$path"; return
+    fi
+    if [ "${OSMFLAT_AUTO_INSTALL:-}" != 1 ]; then
+        cat >&2 <<EOF
+osmflat: $tool is not installed.
+It is a prebuilt binary from https://github.com/$(_osmflat_repo "$tool")/releases,
+installed into $OSMFLAT_HOME. Nothing is downloaded without the user's OK.
+
+  scripts/install.sh --info $tool    # show exactly what would be downloaded
+  scripts/install.sh $tool           # install it, once the user agrees
+
+Or build it from source and put it on PATH; that is used in preference.
+EOF
+        exit 3
     fi
     osmflat_install "$tool" >&2
     path="$OSMFLAT_BINDIR/$tool"

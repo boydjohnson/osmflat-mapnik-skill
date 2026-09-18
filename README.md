@@ -8,8 +8,10 @@ Mapnik XML style, renders it to a PNG, looks at the PNG, and iterates.
 ## Install
 
 Drop this directory into `.claude/skills/osmflat-mapnik-skill/`, or install it
-as a skill package. The scripts fetch what they need from GitHub releases on
-first use — checksum-verified, into `${XDG_DATA_HOME:-~/.local/share}/osmflat`:
+as a skill package. The skill uses four prebuilt tools from the author's GitHub
+releases. They are installed only when you run `scripts/install.sh`
+(`--info` shows what it would download first). Each one is checked against its
+release's `SHA256SUMS` and unpacked into `${XDG_DATA_HOME:-~/.local/share}/osmflat`:
 
 | binary | repo |
 |---|---|
@@ -18,7 +20,8 @@ first use — checksum-verified, into `${XDG_DATA_HOME:-~/.local/share}/osmflat`
 | `osmflatc` | [osmflat-rs](https://github.com/boydjohnson/osmflat-rs) |
 | `osmflat-extc` | [osmflat-ext](https://github.com/boydjohnson/osmflat-ext) |
 
-`scripts/install.sh` pre-warms or upgrades them all.
+Run `scripts/install.sh` again to upgrade, or set `OSMFLAT_AUTO_INSTALL=1` to
+install on first use.
 
 ### Requirements
 

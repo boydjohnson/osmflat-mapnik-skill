@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # Introspect the OSM tag vocabulary of the archive, so style filters are
-# grounded in what the data actually contains. Installs `osmflat-taginfo` on
-# first use. Wraps the taginfo.openstreetmap.org-compatible CLI.
+# grounded in what the data actually contains. Needs `osmflat-taginfo`
+# (scripts/install.sh). Wraps the taginfo.openstreetmap.org-compatible CLI.
 #
 #   taginfo.sh key highway values --format table --sortname count --sortorder desc
 #   taginfo.sh key highway combinations --format table --sortname together_count

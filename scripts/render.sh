@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # Render a Mapnik style through the osmflat datasource to a PNG -- then Read the
-# PNG to see the result. Installs the `render` release on first use.
+# PNG to see the result. Needs `render` (scripts/install.sh).
 #
 #   render.sh <style.xml> <out.png> <minx> <miny> <maxx> <maxy> [width height]
 #   render.sh style.xml /tmp/out.png -93.33 44.93 -93.23 45.01     # Minneapolis

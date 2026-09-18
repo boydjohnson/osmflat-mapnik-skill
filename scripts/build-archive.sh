@@ -5,8 +5,8 @@
 #   build-archive.sh <area.osm.pbf> [out-dir]
 #   build-archive.sh --ext-only <area.osm.flat>     # rebuild just the sidecar
 #
-# Get extracts from download.geofabrik.de or extract.bbbike.org. Both tools
-# install from their latest release on first use.
+# Get extracts from download.geofabrik.de or extract.bbbike.org. Needs
+# osmflatc and osmflat-extc (scripts/install.sh).
 #
 # Sidecar features built here (all of them; drop flags to save time/space):
 #   --taginfo --combinations   tag introspection for taginfo.sh
