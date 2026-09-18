@@ -186,7 +186,12 @@ def render_legend(base_img, items, bg_hex, title, position, fonts):
     title_h = 22 if title else 0
 
     label_w = max(draw.textlength(label, font=label_font) for _, label, _ in items)
-    panel_w = round(pad * 2 + swatch_w + gap + label_w)
+    content_w = swatch_w + gap + label_w
+    if title:
+        # The title is bold and a size up, so it outruns the rows more often
+        # than not; without this it spills over the map beyond the panel edge.
+        content_w = max(content_w, draw.textlength(title, font=title_font))
+    panel_w = round(pad * 2 + content_w)
     panel_h = round(pad * 2 + title_h + row_h * len(items))
 
     margin = 16
